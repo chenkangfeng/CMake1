@@ -1,13 +1,11 @@
 #!/usr/bin/python
 # coding=utf-8
-
 import os, sys
 
 class EnvValue(object):
 	def __init__(self):
-		self.file_name = None
-		self.platforms = type("Enum", (), dict(windows=1, linux=2, mac=3))
-		self.platform  = 0
+		self.platforms = type("Enum", (), dict(unknow=1, windows=2, linux=3, mac=4))
+		self.platform  = self.platforms.unknow
 		if sys.platform == "win32":            self.platform = self.platforms.windows
 		elif sys.platform.startswith("linux"): self.platform = self.platforms.linux
 		elif sys.platform == "darwin":         self.platform = self.platforms.mac
@@ -24,8 +22,7 @@ class EnvValue(object):
 				import _winreg
 				try:
 					env = None
-					env = _winreg.OpenKeyEx(_winreg.HKEY_CURRENT_USER,
-						  "Environment", 0, _winreg.KEY_SET_VALUE|_winreg.KEY_READ)
+					env = _winreg.OpenKeyEx(_winreg.HKEY_CURRENT_USER, "Environment", 0, _winreg.KEY_SET_VALUE|_winreg.KEY_READ)
 					value = _winreg.QueryValueEx(env, key)[0]
 				except Exception: pass
 				finally:
@@ -53,8 +50,7 @@ class EnvValue(object):
 			import _winreg
 			try:
 				env = None
-				env = _winreg.OpenKeyEx(_winreg.HKEY_CURRENT_USER,
-					  "Environment", 0, _winreg.KEY_SET_VALUE|_winreg.KEY_READ)
+				env = _winreg.OpenKeyEx(_winreg.HKEY_CURRENT_USER, "Environment", 0, _winreg.KEY_SET_VALUE|_winreg.KEY_READ)
 				_winreg.SetValueEx(env, key, 0, _winreg.REG_SZ, value)
 				_winreg.FlushKey(env)
 			except Exception: ret = False
@@ -96,5 +92,5 @@ if __name__ == "__main__":
 	value = env.get_env("CMAKE_FRAMEWORK")
 	if value is not None: print "Already exist %s"%value
 	if value != sys.path[0]:
-		if not EnvValue().set_env("CMAKE_FRAMEWORK", sys.path[0]): print "Failed"
-		else: print "Succeed %s"%sys.path[0]
+		if EnvValue().set_env("CMAKE_FRAMEWORK", sys.path[0]): print "Succeed %s"%sys.path[0]
+		else: print "Failed"
