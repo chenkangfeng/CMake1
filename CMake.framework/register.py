@@ -4,15 +4,20 @@ import os, sys
 
 class EnvValue(object):
 	def __init__(self):
+		self.__init_env()
+		if not self.platform == self.platforms.windows:
+			home = os.path.expanduser("~")
+			if self.platform == self.platforms.linux:
+				self.file = os.path.join(home, ".bashrc")
+			elif self.platform == self.platforms.mac:
+				self.file = os.path.join(home, ".bash_profile")
+
+	def __init_env(self):
 		self.platforms = type("Enum", (), dict(unknow=1, windows=2, linux=3, mac=4))
 		self.platform  = self.platforms.unknow
 		if sys.platform == "win32":            self.platform = self.platforms.windows
 		elif sys.platform.startswith("linux"): self.platform = self.platforms.linux
 		elif sys.platform == "darwin":         self.platform = self.platforms.mac
-		if not self.platform == self.platforms.windows:
-			home = os.path.expanduser("~")
-			if self.platform == self.platforms.linux: self.file = os.path.join(home, ".bashrc")
-			elif self.platform == self.platforms.mac: self.file = os.path.join(home, ".bash_profile")
 
 	def get_env(self, key):
 		value = None
@@ -22,7 +27,9 @@ class EnvValue(object):
 				import _winreg
 				try:
 					env = None
-					env = _winreg.OpenKeyEx(_winreg.HKEY_CURRENT_USER, "Environment", 0, _winreg.KEY_SET_VALUE|_winreg.KEY_READ)
+					env = _winreg.OpenKeyEx(_winreg.HKEY_CURRENT_USER,
+											"Environment", 0,
+											_winreg.KEY_SET_VALUE|_winreg.KEY_READ)
 					value = _winreg.QueryValueEx(env, key)[0]
 				except Exception: pass
 				finally:
@@ -50,7 +57,9 @@ class EnvValue(object):
 			import _winreg
 			try:
 				env = None
-				env = _winreg.OpenKeyEx(_winreg.HKEY_CURRENT_USER, "Environment", 0, _winreg.KEY_SET_VALUE|_winreg.KEY_READ)
+				env = _winreg.OpenKeyEx(_winreg.HKEY_CURRENT_USER,
+										"Environment", 0,
+										_winreg.KEY_SET_VALUE|_winreg.KEY_READ)
 				_winreg.SetValueEx(env, key, 0, _winreg.REG_SZ, value)
 				_winreg.FlushKey(env)
 			except Exception: ret = False
