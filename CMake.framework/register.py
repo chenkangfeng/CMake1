@@ -34,7 +34,8 @@ class EnvValue(object):
 				except Exception: pass
 				finally:
 					if env is not None: _winreg.CloseKey(env)
-			elif self.platform == self.platforms.linux or self.platform == self.platforms.mac:
+			elif (self.platform == self.platforms.linux
+				or self.platform == self.platforms.mac):
 				if self.file is not None:
 					try:
 						file = None
@@ -65,11 +66,12 @@ class EnvValue(object):
 			except Exception: ret = False
 			finally:
 				if env is not None: _winreg.CloseKey(env)
-		elif self.platform == self.platforms.linux or self.platform == self.platforms.mac:
+		elif (self.platform == self.platforms.linux
+			or self.platform == self.platforms.mac):
 			if self.file is not None:
 				if self.get_env(key) is None:
 					try:
-						file  = None
+						file = None
 						file = open(self.file, "a")
 						file.write("export %s=%s\n"%(key,value))
 					except Exception: ret = False
@@ -101,5 +103,6 @@ if __name__ == "__main__":
 	value = env.get_env("CMAKE_FRAMEWORK")
 	if value is not None: print "Already exist %s"%value
 	if value != sys.path[0]:
-		if EnvValue().set_env("CMAKE_FRAMEWORK", sys.path[0]): print "Succeed %s"%sys.path[0]
+		if EnvValue().set_env("CMAKE_FRAMEWORK", sys.path[0]):
+			print "Succeed %s"%sys.path[0]
 		else: print "Failed"
