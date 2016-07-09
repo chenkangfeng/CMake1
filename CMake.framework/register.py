@@ -1,10 +1,13 @@
 #!/usr/bin/python
 # coding=utf-8
+#
+# 2016-07-09
+#
 import os, sys
 
 class EnvValue(object):
 	def __init__(self):
-		self.__init_env()
+		self.__initEnv()
 		if not self.platform == self.platforms.windows:
 			home = os.path.expanduser("~")
 			if self.platform == self.platforms.linux:
@@ -12,14 +15,14 @@ class EnvValue(object):
 			elif self.platform == self.platforms.mac:
 				self.file = os.path.join(home, ".bash_profile")
 
-	def __init_env(self):
+	def __initEnv(self):
 		self.platforms = type("Enum", (), dict(unknow=1, windows=2, linux=3, mac=4))
 		self.platform  = self.platforms.unknow
 		if sys.platform == "win32":            self.platform = self.platforms.windows
 		elif sys.platform.startswith("linux"): self.platform = self.platforms.linux
 		elif sys.platform == "darwin":         self.platform = self.platforms.mac
 
-	def get_env(self, key):
+	def GetEnv(self, key):
 		value = None
 		try: value = os.environ[key]
 		except Exception:
@@ -52,7 +55,7 @@ class EnvValue(object):
 						if file is not None: file.close()
 		return value
 
-	def set_env(self, key, value):
+	def SetEnv(self, key, value):
 		ret = True
 		if self.platform == self.platforms.windows:
 			import _winreg
@@ -69,7 +72,7 @@ class EnvValue(object):
 		elif (self.platform == self.platforms.linux
 			or self.platform == self.platforms.mac):
 			if self.file is not None:
-				if self.get_env(key) is None:
+				if self.GetEnv(key) is None:
 					try:
 						file = None
 						file = open(self.file, "a")
@@ -79,30 +82,30 @@ class EnvValue(object):
 						if file is not None: file.close()
 				else:
 					try:
-						file_r = None
-						file_r = open(self.file, "r")
-						file_w = None
-						file_w = open(self.file, "w")
-						lines = file_r.readlines()
+						fileR = None
+						fileR = open(self.file, "r")
+						fileW = None
+						fileW = open(self.file, "w")
+						lines = fileR.readlines()
 						import re
 						self.patten = re.compile(r"^export[ \t]+%s=(.+)"%key)
 						for i in range(len(lines)):
 							if self.patten.match(lines[i].lstrip(" \t")) is not None:
 								lines[i] = "export %s=%s\n"%(key,value)
 								break
-						file_w.writelines(lines)
+						fileW.writelines(lines)
 					except Exception: ret = False
 					finally:
-						if file_r is not None: file_r.close()
-						if file_w is not None: file_w.close()
+						if fileR is not None: fileR.close()
+						if fileW is not None: fileW.close()
 		else: ret = False
 		return ret
 
 if __name__ == "__main__":
 	env = EnvValue()
-	value = env.get_env("CMAKE_FRAMEWORK")
+	value = env.GetEnv("CMAKE_FRAMEWORK")
 	if value is not None: print "Already exist %s"%value
 	if value != sys.path[0]:
-		if EnvValue().set_env("CMAKE_FRAMEWORK", sys.path[0]):
+		if EnvValue().SetEnv("CMAKE_FRAMEWORK", sys.path[0]):
 			print "Succeed %s"%sys.path[0]
 		else: print "Failed"
